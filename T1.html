@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AInstant.com</title>
+<style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
+    .gate-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; min-width: 300px; }
+    input { padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px; margin: 5px; width: 200px; }
+    button { padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+    button:hover { background: #0056b3; }
+    .error { color: red; margin-top: 10px; display: none; }
+    .success { color: green; margin-top: 10px; display: none; }
+    .content { display: none; }
+    .links { margin-top: 15px; }
+    .links a { color: #007bff; cursor: pointer; text-decoration: underline; margin: 0 10px; }
+    .password-reveal { background: #28a745; padding: 15px; border-radius: 5px; margin: 15px 0; color: white; }
+</style>
+</head>
+<body>
+    <div id="loginSection" class="gate-container">
+        <h2>🔒 Login</h2>
+        <p>Enter your credentials:</p>
+        <input type="text" id="usernameInput" placeholder="Username"><br>
+        <input type="password" id="passwordInput" placeholder="Password"><br>
+        <button onclick="login()">Login</button>
+        <p id="errorMsg" class="error">Incorrect credentials. Try again.</p>
+        <div class="links">
+            <a onclick="showCreateAccount()">Create Account</a>
+        </div>
+    </div>
+
+    <div id="createAccountSection" class="gate-container content">
+        <h2>👤 Create Account</h2>
+        <input type="text" id="newUsername" placeholder="Choose Username"><br>
+        <input type="password" id="newPassword" placeholder="Choose Password"><br>
+        <button onclick="createAccount()">Create Account</button>
+        <p id="createErrorMsg" class="error">Username already exists.</p>
+        <p id="createSuccessMsg" class="success">Account created! You now have access.</p>
+        <div class="links">
+            <a onclick="showLogin()">Back to Login</a>
+        </div>
+    </div>
+
+    <div id="contentSection" class="gate-container content">
+        <h1>TEST SITE 1</h1>
+        <p>Welcome, <span id="welcomeUser"></span>!</p>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // Initialize with default account
+        if (!localStorage.getItem('accounts')) {
+            localStorage.setItem('accounts', JSON.stringify({'admin': 'passward1234'}));
+        }
+
+        function getAccounts() {
+            return JSON.parse(localStorage.getItem('accounts') || '{}');
+        }
+
+        function showCreateAccount() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('createAccountSection').style.display = 'block';
+            document.getElementById('createErrorMsg').style.display = 'none';
+            document.getElementById('createSuccessMsg').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('createAccountSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function createAccount() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const accounts = getAccounts();
+
+            if (!username || !password) {
+                document.getElementById('createErrorMsg').textContent = 'Please fill all fields.';
+                document.getElementById('createErrorMsg').style.display = 'block';
+                return;
+            }
+
+            if (accounts[username]) {
+                document.getElementById('createErrorMsg').textContent = 'Username already exists.';
+                document.getElementById('createErrorMsg').style.display = 'block';
+                return;
+            }
+
+            accounts[username] = password;
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            document.getElementById('createErrorMsg').style.display = 'none';
+            document.getElementById('createSuccessMsg').style.display = 'block';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+        }
+
+        function login() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const accounts = getAccounts();
+
+            if (accounts[username] === password) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('contentSection').style.display = 'block';
+                document.getElementById('welcomeUser').textContent = username;
+                document.getElementById('errorMsg').style.display = 'none';
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function logout() {
+            document.getElementById('contentSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>
